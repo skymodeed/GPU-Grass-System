@@ -1,0 +1,15 @@
+{
+  "name": "grass",
+  "version": "1.0.0",
+  "description": "A high-performance grass rendering system for Unity that utilizes GPU instancing and compute shader-based frustum culling.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@modelcontextprotocol/server-github": "^2025.3.28"
+  }
+}

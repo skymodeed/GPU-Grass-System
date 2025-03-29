@@ -1,0 +1,41 @@
+#pragma kernel CSMain
+#include "UnityCG.cginc"
+
+struct GrassData
+{
+    float3 position;
+    float4 rotation;
+    float distanceFactor;
+};
+float4 _planes[6];
+RWStructuredBuffer<GrassData> grassDataBuffer;
+AppendStructuredBuffer<GrassData> validGrassDataBuffer;
+
+
+
+bool IsOutsideThePlane(float4 plane, float3 pointPosition)
+{
+    if(dot(plane.xyz, pointPosition) + plane.w < 0)
+        return true;
+    return false;
+}
+
+
+[numthreads(128,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    GrassData data = grassDataBuffer[id.x];
+    for (int i = 0; i<6; i++)
+    {
+        if(IsOutsideThePlane(_planes[i],data.position))
+        {
+            break;
+        }
+        if(i==5)
+        {
+            validGrassDataBuffer.Append(data);
+        }
+    }
+    
+    return;
+}

@@ -1,0 +1,69 @@
+#pragma kernel CSMain
+
+struct GrassData
+{
+    float3 position;
+    float4 rotation;
+    float distanceFactor;
+};
+
+RWStructuredBuffer<GrassData> grassDataBuffer;
+
+Texture2D<float> _TerrainHeightMap;
+SamplerState sampler_TerrainHeightMap;
+float3 _TerrainPosition; 
+float3 _TerrainSize;
+float3 _CameraPosition;
+float _FarDistance;
+
+
+int _Density;
+uint _PreviewSize;
+float _RandomizeRotation;
+float _RandomizeScale;
+
+// 简单随机函数
+float rand(float seed)
+{
+    return frac(sin(seed) * 43758.5453);
+}
+
+float random(int index, float offset)
+{
+    // 使用 fmod 限制种子范围，避免 index 太大导致精度问题
+    float seed = fmod(float(index), 1000.0) + offset;
+    return rand(seed);
+}
+
+
+[numthreads(8, 8, 1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    if(id.x < uint(_Density * _PreviewSize) && id.y < uint(_Density * _PreviewSize))
+    {
+        GrassData data;
+        float2 pos = 0.0f;
+        int index = id.x + id.y * _Density * _PreviewSize;
+        pos.xy = id.xy/float(_Density);
+        float2 uv;
+        uv.x = pos.x/_TerrainSize.x;
+        uv.y = pos.y/_TerrainSize.z;
+        float r1 = random(index,1);
+        float heightSample = _TerrainHeightMap.SampleLevel(sampler_TerrainHeightMap, uv, 0).r;
+        data.position.x = pos.x + r1;
+        data.position.y = _TerrainPosition.y + heightSample * _TerrainSize.y * 2;
+        data.position.z = pos.y - r1;
+        
+        data.distanceFactor = distance(data.position, _CameraPosition)/_FarDistance;       
+        
+        float r3 = rand(index * 3);
+        float rotAngle = r3 * _RandomizeRotation;
+        float rad = radians(rotAngle);
+        float s = sin(rad * 0.5);
+        float c = cos(rad * 0.5);
+        data.rotation = float4(0, s, 0, c);
+                   
+        grassDataBuffer[index] = data;
+    }
+}
+
