@@ -1,7 +1,5 @@
 # GPU-Instanced Grass System with Frustum Culling
-
-![Grass System Demo](Assets/Texture/dd1VnZr.png)
-
+![alt text](image.png)
 A high-performance Unity grass rendering system using GPU instancing and compute shader-based frustum culling for optimal rendering performance.
 
 ## Features
